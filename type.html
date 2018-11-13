@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>案件分类统计</title>
+    <script src='https://cdn.bootcss.com/echarts/3.4.0/echarts.js'></script>
+    <script src='/static/js/china.js'></script>
+    <script src='/static/js/macarons.js'></script>
+</head>
+<body>
+<table width="1880px" height="960px">
+    <tr>
+        <td><a href="http://192.168.34.46:5000/" ><label>返回首页</label></a></td>
+    </tr>
+    <tr height="100%">
+        <td width="100%">
+
+                <div id='pie_tag' style='width: 100%; height: 100%; float: left;'></div>
+        </td>
+    </tr>
+</table>
+
+<script type='text/javascript'>
+    var pie = echarts.init(document.getElementById('pie_tag'));
+    option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+        title: {
+            text: '案件分类统计',
+            subtext: '饼状图展示',
+            left: 'left',
+            textStyle: {
+                color: '#000'
+            }
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: "{a} <br/>{b}: {c} ({d}%)"
+        },
+        legend: {
+            orient: 'vertical',
+            x: 'left',
+        },
+        series: [
+            {
+                name: '案件-详细分类',
+                type: 'pie',
+                radius: ['50%', '70%'],
+                avoidLabelOverlap: true,
+                label: {
+                    normal: {
+                        show: true,
+                        position: 'outside'
+                    },
+                    emphasis: {
+                        show: true,
+                        textStyle: {
+                            fontSize: '30',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                labelLine: {
+                    normal: {
+                        show: true
+                    }
+                },
+                data: {{ data['minor_category'] | safe }}
+            },
+
+            {
+                name: '案件-大分类',
+                type: 'pie',
+                radius: ['10%', '40%'],
+                avoidLabelOverlap: true,
+                label: {
+                    normal: {
+                        show: false,
+                        position: 'inside'
+                    },
+                    emphasis: {
+                        show: true,
+                        textStyle: {
+                            color: '#000',
+                            fontSize: '20',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                labelLine: {
+                    normal: {
+                        show: true
+                    }
+                },
+                data: {{ data['primary_category'] | safe }}
+            }
+        ]
+    };
+    pie.setOption(option);
+</script>
+
+</body>
+</html>

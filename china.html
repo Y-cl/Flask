@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>全国案发数量统计</title>
+    <script src='https://cdn.bootcss.com/echarts/3.4.0/echarts.js'></script>
+    <script src='/static/js/china.js'></script>
+    <script src='/static/js/macarons.js'></script>
+</head>
+<body>
+<table width="1880px" height="960px">
+    <tr>
+        <td><a href="http://192.168.34.46:5000/" ><label>返回首页</label></a></td>
+    </tr>
+    <tr height="100%">
+        <td width="100%">
+
+                <div id='map' style='width: 100%; height: 100%; float: left;'></div>
+        </td>
+    </tr>
+</table>
+
+<script type='text/javascript'>
+    var map = echarts.init(document.getElementById('map'));
+
+    var option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+        title: {
+            text: '全国案发数量统计',
+            subtext: '地图展示',
+            x: 'left'
+        },
+        tooltip: {//提示框组件。
+            trigger: 'item'//数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。
+        },
+        legend: {
+            orient: 'horizontal',//图例的排列方向
+            x: 'center',//图例的位置
+            data: ['案发量']
+        },
+        dataRange: {//颜色的设置  dataRange
+            x: 'left',
+            y: 'center',
+            min: 0,
+            max: 1500,
+            calculable: true,//颜色呈条状
+            text: ['高', '低'],// 文本，默认为数值文本
+            color: ['#E0022B', '#E09107', '#A3E00B']
+        },
+        toolbox: {//工具栏
+            show: true,
+            orient: 'vertical',//工具栏 icon 的布局朝向
+            x: 'right',
+            y: 'center',
+            feature: {//各工具配置项。
+                mark: {show: true},
+                dataView: {show: true, readOnly: false},//数据视图工具，可以展现当前图表所用的数据，编辑后可以动态更新。
+                restore: {show: true},//配置项还原。
+                saveAsImage: {show: true}//保存为图片。
+            }
+        },
+        series: [
+            {
+                name: '案发量',
+                type: 'map',
+                mapType: 'china',
+                roam: false,//是否开启鼠标缩放和平移漫游
+                itemStyle: {//地图区域的多边形 图形样式
+                    normal: {//是图形在默认状态下的样式
+                        label: {
+                            show: true,//是否显示标签
+                            textStyle: {
+                                color: "rgb(249, 249, 249)"
+                            }
+                        }
+                    },
+                    emphasis: {//是图形在高亮状态下的样式,比如在鼠标悬浮或者图例联动高亮时
+                        label: {show: true}
+                    }
+                },
+                top: "5%",//组件距离容器的距离
+                data: {{ data['china'] | safe }}
+            }
+        ]
+    };
+    map.setOption(option);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>数据可视化系统样例展示</title>
+    <!-- 引入 echarts.js -->
+    <script src='https://cdn.bootcss.com/echarts/3.4.0/echarts.js'></script>
+    <script src='/static/js/china.js'></script>
+    <script src='/static/js/macarons.js'></script>
+</head>
+<body>
+<table width="1880px" height="60px">
+    <tr align="center">
+        <td bgcolor="#00bfff" width="20%">
+            <a href="http://192.168.34.46:5000/_break" ><label><strong>展示辽宁省各地区案发量和侦破量柱状图</strong></label></a>
+        </td>
+        <td bgcolor="#ff69b4" width="20%">
+            <a href="http://192.168.34.46:5000/_china" ><label><strong>展示全国案发数量统计图</strong></label></a>
+        </td>
+        <td bgcolor="#adff2f" width="20%">
+            <a href="http://192.168.34.46:5000/_trend" ><label><strong>展示案发趋势折线图</strong></label></a>
+        </td>
+        <td bgcolor="lime" width="20%">
+            <a href="http://192.168.34.46:5000/_type" ><label><strong>展示案件分类统计饼状图</strong></label></a>
+        </td>
+        <td bgcolor="#fa8072" width="20%">
+            <a href="http://192.168.34.46:5000/_leida" ><label><strong>省内案发侦破雷达图</strong></label></a>
+        </td>
+    </tr>
+</table>
+<table width="1880px" height="960px">
+    <tr height="30%">
+        <td width="30%">
+
+            <div id='pie_tag' style='width: 100%; height: 100%; float: left;'></div>
+        </td>
+        <td width="30%">
+
+            <div id='map' style='width: 100%; height: 100%; float: left;'></div>
+        </td>
+        <td width="40%">
+
+            <div id='leida' style='width: 100%; height: 100%; float: left;'></div>
+        </td>
+    </tr>
+    <tr height="35%">
+        <td width="100%" colspan="3">
+            <
+            <div id='hist' style='width: 100%; height: 100%; float: left;'></div></a>
+        </td>
+    </tr>
+    <tr height="35%">
+        <td width="100%" colspan="3">
+
+            <div id='line' style='width: 100%; height: 100%; float: left;'></div>
+        </td>
+    </tr>
+</table>
+
+
+
+<script>
+    var leida = echarts.init(document.getElementById('leida'));
+    option = {backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+    title : {
+        text: '辽宁省内各地区案件数量雷达图',
+        {#subtext: '纯属虚构'#}
+    },
+    tooltip: {},
+    legend: {
+        data:['侦破数量','案件数量']
+    },
+    radar: {
+        // shape: 'circle',
+        name: {
+            textStyle: {
+                color: '#f00',
+                backgroundColor: '#999',
+                borderRadius: 3,
+                padding: [3, 5]
+           }
+        },
+        indicator:{{ textlist | safe}}
+    },
+    series : [
+        {
+            name: '侦破数量 vs 案件数量',
+            type: 'radar',
+            data : [
+                {
+                    value : {{ data['break'] | safe}},
+                    name : '侦破数量'
+                },
+                 {
+                    value : {{ data['case'] | safe}},
+                    name : '案件数量'
+                }
+            ]
+        }]
+};
+    leida.setOption(option);
+</script>
+
+<script type='text/javascript'>
+    var pie = echarts.init(document.getElementById('pie_tag'));
+    option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+        title: {
+            text: '案件分类统计',
+            subtext: '饼状图展示',
+            left: 'left',
+            textStyle: {
+                color: '#000'
+            }
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: "{a} <br/>{b}: {c} ({d}%)"
+        },
+        legend: {
+            orient: 'vertical',
+            x: 'left',
+        },
+        series: [
+            {
+                name: '案件-详细分类',
+                type: 'pie',
+                radius: ['50%', '70%'],
+                avoidLabelOverlap: true,
+                label: {
+                    normal: {
+                        show: true,
+                        position: 'outside'
+                    },
+                    emphasis: {
+                        show: true,
+                        textStyle: {
+                            fontSize: '30',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                labelLine: {
+                    normal: {
+                        show: true
+                    }
+                },
+                data: {{ data['minor_category'] | safe }}
+            },
+
+            {
+                name: '案件-大分类',
+                type: 'pie',
+                radius: ['10%', '40%'],
+                avoidLabelOverlap: true,
+                label: {
+                    normal: {
+                        show: false,
+                        position: 'inside'
+                    },
+                    emphasis: {
+                        show: true,
+                        textStyle: {
+                            color: '#000',
+                            fontSize: '20',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                labelLine: {
+                    normal: {
+                        show: true
+                    }
+                },
+                data: {{ data['primary_category'] | safe }}
+            }
+        ]
+    };
+    pie.setOption(option);
+</script>
+
+<script type='text/javascript'>
+    var map = echarts.init(document.getElementById('map'));
+
+    var option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+        title: {
+            text: '全国案发数量统计',
+            subtext: '地图展示',
+            x: 'left'
+        },
+        tooltip: {//提示框组件。
+            trigger: 'item'//数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。
+        },
+        legend: {
+            orient: 'horizontal',//图例的排列方向
+            x: 'center',//图例的位置
+            data: ['案发量']
+        },
+        dataRange: {//颜色的设置  dataRange
+            x: 'left',
+            y: 'center',
+            min: 0,
+            max: 1500,
+            calculable: true,//颜色呈条状
+            text: ['高', '低'],// 文本，默认为数值文本
+            color: ['#E0022B', '#E09107', '#A3E00B']
+        },
+        toolbox: {//工具栏
+            show: true,
+            orient: 'vertical',//工具栏 icon 的布局朝向
+            x: 'right',
+            y: 'center',
+            feature: {//各工具配置项。
+                mark: {show: true},
+                dataView: {show: true, readOnly: false},//数据视图工具，可以展现当前图表所用的数据，编辑后可以动态更新。
+                restore: {show: true},//配置项还原。
+                saveAsImage: {show: true}//保存为图片。
+            }
+        },
+        series: [
+            {
+                name: '案发量',
+                type: 'map',
+                mapType: 'china',
+                roam: false,//是否开启鼠标缩放和平移漫游
+                itemStyle: {//地图区域的多边形 图形样式
+                    normal: {//是图形在默认状态下的样式
+                        label: {
+                            show: true,//是否显示标签
+                            textStyle: {
+                                color: "rgb(249, 249, 249)"
+                            }
+                        }
+                    },
+                    emphasis: {//是图形在高亮状态下的样式,比如在鼠标悬浮或者图例联动高亮时
+                        label: {show: true}
+                    }
+                },
+                top: "5%",//组件距离容器的距离
+                data: {{ data['china'] | safe }}
+            }
+        ]
+    };
+    map.setOption(option);
+</script>
+
+<script type='text/javascript'>
+    // 基于准备好的dom，初始化echarts实例
+    var hist = echarts.init(document.getElementById('hist'), 'macarons');
+
+    option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+        title: {
+            text: '辽宁各地区案发量和侦破量统计',
+            subtext: '柱状图展示',
+            textStyle: {
+                color: '#000',
+                fontWeight: 'bold'
+            }
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['案发量', '侦破量']
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                mark: {show: true},
+                dataView: {show: true, readOnly: false},
+                <!-- magicType: {show: true, type: ['line', 'bar']}, -->
+                restore: {show: true},
+                saveAsImage: {show: true}
+            }
+        },
+        calculable: true,
+        xAxis: [
+            {
+                type: 'category',
+                data: {{ data['area'] | safe }}
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value} 件'
+                }
+            }
+        ],
+        series: [
+            {
+                name: '案发量',
+                type: 'bar',
+                data: {{ data['case'] | safe }},
+                markLine: {
+                    data: [
+                        {type: 'average', name: '平均值'}
+                    ]
+                }
+            },
+            {
+                name: '侦破量',
+                type: 'bar',
+                data: {{ data['break'] | safe }},
+                markLine: {
+                    data: [
+                        {type: 'average', name: '平均值'}
+                    ]
+                }
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    hist.setOption(option);
+</script>
+
+<script type='text/javascript'>
+    var line = echarts.init(document.getElementById('line'));
+    option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+        title: {
+            text: '案发趋势图',
+            subtext: '折线图展示',
+            left: 'left'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data:{{ data['time_list'] | safe }}
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                data: {{ data['time_list']  | safe }}
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value} 件'
+                }
+            }
+        ],
+        series: [
+            {% for tag in data['type_list'] %}
+                {
+                    name: '{{ tag['name'] | safe }}',
+                    type: 'line',
+                    stack: '总量',
+                    <!-- areaStyle: {normal: {}}, -->
+                    {# loop.index0 : 循环迭代计数（从0开始） #}
+                    data: {{ data['tag_time_list'][loop.index0] }},
+                    markPoint: {
+                        data: [
+                            {type: 'max', name: '最大值'},
+                            {type: 'min', name: '最小值'}
+                        ]
+                    },
+                    markLine: {
+                        data: [
+                            {type: 'average', name: '平均值'}
+                        ]
+                    }
+                },
+            {% endfor %}
+        ]
+    };
+    line.setOption(option);
+</script>
+</body>
+</html>
